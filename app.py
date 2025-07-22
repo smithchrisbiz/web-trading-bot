@@ -1,4 +1,9 @@
-import websocket
+try:
+    import websocket  # Should resolve to websocket-client
+except ImportError:
+    print("websocket-client package not found. Please run 'pip install websocket-client' in the shell and try again.")
+    exit(1)
+
 import json
 import pandas as pd
 import pandas_ta
@@ -7,7 +12,7 @@ import threading
 import pytz
 from datetime import datetime, time
 import telegram
-import finnhub  # Added for API key validation
+import finnhub
 
 # Configuration (hardcoded for web environment)
 FINNHUB_API_KEY = "d1vhbphr01qqgeelhtj0d1vhbphr01qqgeelhtjg"
@@ -20,14 +25,12 @@ IST = pytz.timezone('Asia/Kolkata')
 # Store latest price data
 price_data = {symbol: [] for symbol in SYMBOLS}
 
-# Check if current time is within trading window (always active for testing)
+# Check if current time is within trading window (set to 0100-2300 IST)
 def is_trading_time():
     now = datetime.now(IST).time()
-    # Uncomment and adjust for 1:00 AM - 11:00 PM IST if needed
-    # start_time = time(1, 0)
-    # end_time = time(23, 0)
-    # return start_time <= now <= end_time
-    return True  # Always active for testing
+    start_time = time(1, 0)  # 0100 IST
+    end_time = time(23, 0)   # 2300 IST
+    return start_time <= now <= end_time
 
 # Validate Finnhub API Key
 def validate_finnhub_api_key(api_key):
@@ -81,7 +84,7 @@ async def send_telegram_message(message):
 # WebSocket handler
 def on_message(ws, message):
     if not is_trading_time():
-        print("Outside trading window, skipping message")
+        print("Outside trading window (0100-2300 IST), skipping message")
         return
     try:
         data = json.loads(message)
@@ -139,7 +142,7 @@ def start_websocket():
         )
         ws.run_forever()
     except AttributeError as e:
-        print(f"WebSocketApp error: {e}. Please ensure websocket-client is installed.")
+        print(f"WebSocketApp error: {e}. Please ensure 'pip install websocket-client==1.8.0' was successful.")
     except Exception as e:
         print(f"Unexpected error in start_websocket: {e}")
 
