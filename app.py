@@ -11,7 +11,7 @@ import asyncio
 import threading
 import pytz
 from datetime import datetime, time
-from telegram import Bot  # Explicitly import Bot class
+from telegram import Bot  # Using version 13.7 where Bot is directly importable
 import finnhub
 
 # Configuration (hardcoded for web environment)
@@ -19,7 +19,7 @@ FINNHUB_API_KEY = "d1vhbphr01qqgeelhtj0d1vhbphr01qqgeelhtjg"
 TELEGRAM_TOKEN = "7769081812:AAG1nMhPiFMvsVdmkTWr6k-p78e-Lj9atRQ"
 TELEGRAM_CHAT_ID = "1131774812"
 SYMBOLS = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'BINANCE:BTCUSDT', 'BINANCE:ETHUSDT']
-DURATIONS = ['5m']  # Simplified to one duration
+DURATIONS = ['1m', '5m', '10m', '15m']  # Updated to include multiple durations
 IST = pytz.timezone('Asia/Kolkata')
 
 # Store latest price data
@@ -66,20 +66,24 @@ def generate_signal(symbol, df):
     # Basic signal based on price change
     if latest['close'] > prev['close']:
         reason = "Price increased"
-        return {'direction': 'up', 'reason': reason, 'duration': DURATIONS[0], 'price': latest['close']}
+        return {'direction': 'up', 'reason': reason, 'price': latest['close']}
     elif latest['close'] < prev['close']:
         reason = "Price decreased"
-        return {'direction': 'down', 'reason': reason, 'duration': DURATIONS[0], 'price': latest['close']}
+        return {'direction': 'down', 'reason': reason, 'price': latest['close']}
     return None
 
-# Send signal to Telegram
-async def send_telegram_message(message):
+# Send signal to Telegram for each duration
+async def send_telegram_message(message, durations):
     try:
         bot = Bot(token=TELEGRAM_TOKEN)
-        await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
-        print(f"Telegram message sent: {message}")
+        for duration in durations:
+            full_message = f"{message}, Trade for: {duration}"
+            await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=full_message)
+            print(f"Telegram message sent: {full_message}")
+    except AttributeError as e:
+        print(f"Telegram attribute error: {e}. Please ensure 'python-telegram-bot' version 13.7 is installed.")
     except Exception as e:
-        print(f"Telegram error: {e}. Please verify TELEGRAM_TOKEN and reinstall 'python-telegram-bot' if needed.")
+        print(f"Telegram error: {e}. Please verify TELEGRAM_TOKEN and reinstall 'python-telegram-bot'.")
 
 # WebSocket handler
 def on_message(ws, message):
@@ -105,9 +109,8 @@ def on_message(ws, message):
                     signal = generate_signal(symbol, df)
                     if signal:
                         message = (f"Make {signal['direction']} on {symbol} at {timestamp.strftime('%H:%M:%S %Z')}, "
-                                  f"Reason: {signal['reason']}, Trade for: {signal['duration']}, "
-                                  f"Current Price: {signal['price']}")
-                        asyncio.run(send_telegram_message(message))
+                                  f"Reason: {signal['reason']}, Current Price: {signal['price']}")
+                        asyncio.run(send_telegram_message(message, DURATIONS))
                 else:
                     print(f"Invalid tick data: {tick}")
     except Exception as e:
