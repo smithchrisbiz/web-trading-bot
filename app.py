@@ -1,4 +1,9 @@
-import websocket_client as websocket  # Explicitly import websocket-client
+try:
+    import websocket  # Use the default import name after ensuring installation
+except ImportError:
+    print("websocket-client package not found. Please install it with 'pip install websocket-client'.")
+    exit(1)
+
 import json
 import pandas as pd
 import pandas_ta
@@ -124,7 +129,7 @@ def start_websocket():
         )
         ws.run_forever()
     except AttributeError as e:
-        print(f"WebSocketApp error: {e}. Ensure websocket-client is installed correctly.")
+        print(f"WebSocketApp error: {e}. Please ensure websocket-client is installed.")
     except Exception as e:
         print(f"Unexpected error in start_websocket: {e}")
 
