@@ -1,9 +1,4 @@
-try:
-    import websocket  # Use the default import name after ensuring installation
-except ImportError:
-    print("websocket-client package not found. Please install it with 'pip install websocket-client'.")
-    exit(1)
-
+import websocket
 import json
 import pandas as pd
 import pandas_ta
@@ -12,6 +7,7 @@ import threading
 import pytz
 from datetime import datetime, time
 import telegram
+import finnhub  # Added for API key validation
 
 # Configuration (hardcoded for web environment)
 FINNHUB_API_KEY = "d1vhbphr01qqgeelhtj0d1vhbphr01qqgeelhtjg"
@@ -32,6 +28,17 @@ def is_trading_time():
     # end_time = time(23, 0)
     # return start_time <= now <= end_time
     return True  # Always active for testing
+
+# Validate Finnhub API Key
+def validate_finnhub_api_key(api_key):
+    try:
+        finnhub_client = finnhub.Client(api_key=api_key)
+        finnhub_client.quote('AAPL')  # Test with a known symbol
+        print("Finnhub API Key is valid")
+        return True
+    except Exception as e:
+        print(f"Finnhub API Key validation failed: {e}")
+        return False
 
 # Calculate indicators and generate signals
 def calculate_indicators(df):
@@ -117,6 +124,9 @@ def on_open(ws):
 
 # Start WebSocket in a separate thread
 def start_websocket():
+    if not validate_finnhub_api_key(FINNHUB_API_KEY):
+        print("Invalid Finnhub API Key. Aborting WebSocket connection.")
+        return
     ws_url = f"wss://ws.finnhub.io?token={FINNHUB_API_KEY}"
     print(f"Attempting to connect to {ws_url}")
     try:
