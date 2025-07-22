@@ -11,7 +11,7 @@ import asyncio
 import threading
 import pytz
 from datetime import datetime, time
-import telegram
+from telegram import Bot  # Explicitly import Bot class
 import finnhub
 
 # Configuration (hardcoded for web environment)
@@ -25,7 +25,7 @@ IST = pytz.timezone('Asia/Kolkata')
 # Store latest price data
 price_data = {symbol: [] for symbol in SYMBOLS}
 
-# Check if current time is within trading window (set to 0100-2300 IST)
+# Check if current time is within trading window (0100-2300 IST)
 def is_trading_time():
     now = datetime.now(IST).time()
     start_time = time(1, 0)  # 0100 IST
@@ -75,11 +75,11 @@ def generate_signal(symbol, df):
 # Send signal to Telegram
 async def send_telegram_message(message):
     try:
-        bot = telegram.Bot(token=TELEGRAM_TOKEN)
+        bot = Bot(token=TELEGRAM_TOKEN)
         await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
         print(f"Telegram message sent: {message}")
     except Exception as e:
-        print(f"Telegram error: {e}")
+        print(f"Telegram error: {e}. Please verify TELEGRAM_TOKEN and reinstall 'python-telegram-bot' if needed.")
 
 # WebSocket handler
 def on_message(ws, message):
@@ -142,7 +142,7 @@ def start_websocket():
         )
         ws.run_forever()
     except AttributeError as e:
-        print(f"WebSocketApp error: {e}. Please ensure 'pip install websocket-client==1.8.0' was successful.")
+        print(f"WebSocketApp error: {e}. Please run 'pip install websocket-client==1.8.0' in the shell.")
     except Exception as e:
         print(f"Unexpected error in start_websocket: {e}")
 
