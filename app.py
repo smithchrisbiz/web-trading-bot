@@ -1,4 +1,4 @@
-import websocket
+import websocket_client as websocket  # Explicitly import websocket-client
 import json
 import pandas as pd
 import pandas_ta
@@ -114,14 +114,19 @@ def on_open(ws):
 def start_websocket():
     ws_url = f"wss://ws.finnhub.io?token={FINNHUB_API_KEY}"
     print(f"Attempting to connect to {ws_url}")
-    ws = websocket.WebSocketApp(
-        ws_url,
-        on_message=on_message,
-        on_error=on_error,
-        on_close=on_close,
-        on_open=on_open
-    )
-    ws.run_forever()
+    try:
+        ws = websocket.WebSocketApp(
+            ws_url,
+            on_message=on_message,
+            on_error=on_error,
+            on_close=on_close,
+            on_open=on_open
+        )
+        ws.run_forever()
+    except AttributeError as e:
+        print(f"WebSocketApp error: {e}. Ensure websocket-client is installed correctly.")
+    except Exception as e:
+        print(f"Unexpected error in start_websocket: {e}")
 
 if __name__ == '__main__':
     # Start WebSocket in a background thread
