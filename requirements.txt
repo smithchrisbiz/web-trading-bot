@@ -3,4 +3,4 @@ pandas==2.2.2
 pandas_ta==0.3.14b0
 numpy==1.26.4
 websocket-client==1.8.0
-python-telegram-bot==20.7
+python-telegram-bot==20.6  # Downgrade to a stable version to avoid potential API changes
