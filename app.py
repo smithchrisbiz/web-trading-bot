@@ -27,7 +27,7 @@ except ImportError:
 FINNHUB_API_KEY = "d1vhbphr01qqgeelhtj0d1vhbphr01qqgeelhtjg"  # Update this if you get a new key
 TELEGRAM_TOKEN = "7769081812:AAG1nMhPiFMvsVdmkTWr6k-p78e-Lj9atRQ"
 TELEGRAM_CHAT_ID = "1131774812"
-SYMBOLS = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'BTC/USD', 'ETH/USD']  # Reverted to generic symbols
+SYMBOLS = ['EUR/USD', 'GBP/USD', 'USD/JPY']  # Reverted to generic symbols
 DURATIONS = ['1m', '5m', '10m', '15m']  # Multiple durations
 IST = pytz.timezone('Asia/Kolkata')
 
