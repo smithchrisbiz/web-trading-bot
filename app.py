@@ -27,7 +27,7 @@ except ImportError:
 FINNHUB_API_KEY = "d1vhbphr01qqgeelhtj0d1vhbphr01qqgeelhtjg"
 TELEGRAM_TOKEN = "7769081812:AAG1nMhPiFMvsVdmkTWr6k-p78e-Lj9atRQ"
 TELEGRAM_CHAT_ID = "1131774812"
-SYMBOLS = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'BINANCE:BTCUSDT', 'BINANCE:ETHUSDT']
+SYMBOLS = ['OANDA:EUR_USD', 'OANDA:GBP_USD', 'OANDA:USD_JPY']  # Updated to OANDA forex pairs
 DURATIONS = ['1m', '5m', '10m', '15m']  # Multiple durations
 IST = pytz.timezone('Asia/Kolkata')
 
