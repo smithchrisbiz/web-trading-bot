@@ -24,10 +24,10 @@ except ImportError:
     print("Using telegram-bot version 13.7")
 
 # Configuration (hardcoded for web environment)
-FINNHUB_API_KEY = "d1vhbphr01qqgeelhtj0d1vhbphr01qqgeelhtjg"
+FINNHUB_API_KEY = "d1vhbphr01qqgeelhtj0d1vhbphr01qqgeelhtjg"  # Update this if you get a new key
 TELEGRAM_TOKEN = "7769081812:AAG1nMhPiFMvsVdmkTWr6k-p78e-Lj9atRQ"
 TELEGRAM_CHAT_ID = "1131774812"
-SYMBOLS = ['OANDA:EUR_USD', 'OANDA:GBP_USD', 'OANDA:USD_JPY']  # Updated to OANDA forex pairs
+SYMBOLS = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'BTC/USD', 'ETH/USD']  # Reverted to generic symbols
 DURATIONS = ['1m', '5m', '10m', '15m']  # Multiple durations
 IST = pytz.timezone('Asia/Kolkata')
 
@@ -55,19 +55,23 @@ def validate_finnhub_api_key(api_key):
 # Calculate indicators and generate signals
 def calculate_indicators(df):
     try:
+        if df.empty or 'close' not in df.columns:
+            print(f"Invalid DataFrame for indicators: {df}")
+            return df
         df['close'] = df['close'].astype(float)
         df['rsi'] = pandas_ta.rsi(df['close'], length=14)
         df['ema50'] = pandas_ta.ema(df['close'], length=50)
         df['ema200'] = pandas_ta.ema(df['close'], length=200)
         df['macd'] = pandas_ta.macd(df['close'], fast=12, slow=26, signal=9)['MACD_12_26_9']
         df['macd_signal'] = pandas_ta.macd(df['close'], fast=12, slow=26, signal=9)['MACDs_12_26_9']
+        print(f"Indicators calculated: {df.tail()}")
         return df
     except Exception as e:
         print(f"Indicator calculation error: {e}")
         return df
 
 def generate_signal(symbol, df):
-    if len(df) < 50:  # Minimum data points
+    if len(df) < 10:  # Threshold set to 10
         print(f"Insufficient data for {symbol}: {len(df)} rows")
         return None
     latest = df.iloc[-1]
